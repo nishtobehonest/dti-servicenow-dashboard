@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ServiceNow App Engine — Project Dashboard</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-border: #bbf7d0;
+      --yellow: #ca8a04;
+      --yellow-bg: #fefce8;
+      --yellow-border: #fde68a;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-border: #bfdbfe;
+      --purple: #9333ea;
+      --purple-bg: #faf5ff;
+      --purple-border: #e9d5ff;
+      --orange: #ea580c;
+      --orange-bg: #fff7ed;
+      --orange-border: #fed7aa;
+      --teal: #0d9488;
+      --teal-bg: #f0fdfa;
+      --teal-border: #99f6e4;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, #2563eb, #0d9488);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #fff;
+      flex-shrink: 0;
+    }
+    .header-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .header-sub { font-size: 12px; color: var(--muted); }
+    .header-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .badge {
+      padding: 3px 9px; border-radius: 20px; font-size: 11px;
+      font-weight: 600; letter-spacing: 0.3px;
+    }
+    .badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
+    .badge-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+    .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-border); }
+    .tag { font-size: 12px; color: var(--muted); }
+
+    /* TAB NAV */
+    .tab-nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      gap: 0;
+      position: sticky;
+      top: 65px;
+      z-index: 99;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+      font-weight: 600;
+    }
+
+    /* TAB CONTENT */
+    .tab-content { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* SECTION LABEL */
+    .section-label {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.8px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section { margin-bottom: 28px; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin-bottom: 12px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* INSIGHT CARDS */
+    .insight-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .insight-card.green  { border-left: 3px solid var(--green);  background: var(--green-bg); }
+    .insight-card.yellow { border-left: 3px solid var(--yellow); background: var(--yellow-bg); }
+    .insight-card.red    { border-left: 3px solid var(--red);    background: var(--red-bg); }
+    .insight-card.blue   { border-left: 3px solid var(--blue);   background: var(--blue-bg); }
+    .insight-card.purple { border-left: 3px solid var(--purple); background: var(--purple-bg); }
+    .insight-card.orange { border-left: 3px solid var(--orange); background: var(--orange-bg); }
+    .insight-card.teal   { border-left: 3px solid var(--teal);   background: var(--teal-bg); }
+    .ic-signal {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .ic-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--text); }
+    .ic-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* STAT ROW */
+    .stat-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      flex: 1; min-width: 75px;
+      box-shadow: var(--shadow);
+    }
+    .stat-val { font-size: 22px; font-weight: 800; line-height: 1; }
+    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* DELIVERABLE ITEMS */
+    .deliverable {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s;
+    }
+    .deliverable:hover { border-color: #cbd5e1; }
+    .del-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .del-title { font-weight: 600; font-size: 13px; color: var(--text); flex: 1; }
+    .del-type { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .del-meta { display: flex; gap: 16px; margin-top: 6px; }
+    .del-owner { font-size: 12px; color: var(--muted); }
+    .del-owner span { color: var(--blue); font-weight: 500; }
+    .del-due { font-size: 12px; color: var(--muted); }
+    .del-due span { color: var(--orange); font-weight: 500; }
+    .status-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 3px;
+    }
+    .dot-done { background: var(--green); }
+    .dot-prog { background: var(--yellow); box-shadow: 0 0 6px rgba(202,138,4,0.4); }
+    .dot-todo { background: #cbd5e1; }
+
+    /* WEEK BOX */
+    .week-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+    }
+    .week-label { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .week-label.done  { color: var(--green); }
+    .week-label.prog  { color: var(--yellow); }
+    .week-label.block { color: var(--muted); }
+    .week-item { font-size: 13px; color: var(--muted); margin-bottom: 3px; padding-left: 12px; position: relative; }
+    .week-item::before { content: '→'; position: absolute; left: 0; color: #cbd5e1; }
+
+    /* OVERVIEW GRID */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .overview-grid .full-width { grid-column: 1 / -1; }
+
+    /* MILESTONES */
+    .milestone-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .milestone-row:last-child { border-bottom: none; }
+    .milestone-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+    }
+    .milestone-date { font-size: 12px; color: var(--muted); min-width: 90px; font-weight: 500; }
+    .milestone-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .milestone-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* NEXT STEPS */
+    .next-step-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .ns-tag {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .ns-tag.priority { background: var(--red-bg); color: var(--red); }
+    .ns-tag.gap      { background: var(--yellow-bg); color: var(--yellow); }
+    .ns-tag.client   { background: var(--blue-bg); color: var(--blue); }
+    .ns-tag.bap      { background: var(--purple-bg); color: var(--purple); }
+    .ns-tag.team     { background: var(--green-bg); color: var(--green); }
+    .ns-body { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .ns-body strong { color: var(--text); }
+
+    /* FINDINGS GRID */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    .findings-col { }
+    .findings-col-title {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* BAP */
+    .bap-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .bap-stage {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .bap-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bap-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+    .bap-stage-title { font-weight: 700; font-size: 14px; }
+    .bap-stage-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .bap-row { margin-bottom: 10px; }
+    .bap-row-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .bap-row-body { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* COMPETITIVE */
+    .comp-table { width: 100%; border-collapse: collapse; }
+    .comp-table th {
+      text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+      padding: 8px 12px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .comp-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      font-size: 13px; vertical-align: middle;
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:hover td { background: var(--surface2); }
+    .comp-name { font-weight: 700; }
+    .comp-time { color: var(--muted); white-space: nowrap; }
+    .comp-highlight { color: var(--orange); font-weight: 600; }
+    .comp-note { color: var(--muted); }
+
+    .competitive-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── JOURNEY MAP ── */
+    .jm-wrap {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .jm-table {
+      min-width: 1100px;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .jm-stage-header {
+      background: var(--surface2);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 14px;
+      vertical-align: middle;
+    }
+    .jm-stage-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 11px; font-weight: 800; margin-right: 7px;
+      flex-shrink: 0; vertical-align: middle;
+    }
+    .jm-stage-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .jm-stage-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .jm-persona-label {
+      padding: 10px 14px;
+      background: var(--surface);
+      border-right: 2px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      min-width: 110px;
+      vertical-align: top;
+    }
+    .jm-persona-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .jm-persona-role { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .jm-cell {
+      padding: 10px 12px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      vertical-align: top;
+      min-width: 170px;
+    }
+    .jm-cell:last-child { border-right: none; }
+
+    .jm-action { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 7px; }
+    .jm-tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px; margin-bottom: 4px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .jm-tag.friction { background: var(--red-bg);    color: var(--red); }
+    .jm-tag.enabler  { background: var(--green-bg);  color: var(--green); }
+    .jm-tag.risk     { background: var(--orange-bg); color: var(--orange); }
+    .jm-tag-text { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 5px; display: block; }
+
+    .jm-emotion {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; margin-top: 5px;
+      padding: 2px 7px; border-radius: 10px;
+    }
+    .jm-emotion.positive { background: var(--green-bg);  color: var(--green); }
+    .jm-emotion.neutral  { background: var(--blue-bg);   color: var(--blue); }
+    .jm-emotion.friction { background: var(--yellow-bg); color: var(--yellow); }
+    .jm-emotion.atrisk   { background: var(--red-bg);    color: var(--red); }
+
+    .jm-arc-row td {
+      padding: 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .jm-arc-cell {
+      height: 8px;
+      border-right: 1px solid #fff;
+    }
+
+    .jm-ba-row td { background: #fffbeb; border-bottom: 1px solid var(--border); }
+    .jm-ba-label {
+      padding: 10px 14px;
+      background: #fef3c7;
+      border-right: 2px solid #fbbf24;
+      vertical-align: top;
+    }
+    .jm-ba-cell {
+      padding: 10px 12px;
+      border-right: 1px solid var(--border);
+      vertical-align: top;
+      background: #fffbeb;
+    }
+    .jm-ba-cell:last-child { border-right: none; }
+    .jm-ba-text { font-size: 12px; color: #92400e; line-height: 1.5; }
+
+    /* ── CONFIDENCE BADGES ── */
+    .conf-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px; margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .conf-secondary { background: var(--blue-bg);   color: var(--blue); }
+    .conf-hypothesis { background: var(--yellow-bg); color: var(--yellow); }
+
+    /* ── VALIDATION TABLE ── */
+    .val-table { width: 100%; border-collapse: collapse; }
+    .val-table th {
+      text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+      padding: 8px 12px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .val-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      font-size: 13px; vertical-align: top; line-height: 1.5;
+    }
+    .val-table tr:last-child td { border-bottom: none; }
+    .val-table tr:hover td { background: var(--surface2); }
+    .conf-high   { color: var(--green);  font-weight: 700; }
+    .conf-medium { color: var(--yellow); font-weight: 700; }
+
+    /* ── WORKFLOW DIAGRAM ── */
+    .wf-wrap { overflow-x: auto; padding-bottom: 8px; }
+    .wf-flow {
+      display: flex; align-items: flex-start; gap: 0;
+      min-width: 900px; padding: 8px 0 16px;
+    }
+    .wf-step { display: flex; align-items: flex-start; flex: 1; }
+    .wf-box-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .wf-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 10px; width: 100%;
+      box-shadow: var(--shadow); position: relative;
+    }
+    .wf-box-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .wf-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; flex-shrink: 0;
+    }
+    .wf-name { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .wf-tools { list-style: none; padding: 0; margin: 0; }
+    .wf-tools li {
+      font-size: 10px; font-family: 'SFMono-Regular', 'Consolas', monospace;
+      color: var(--muted); background: var(--surface2);
+      border-radius: 3px; padding: 1px 5px; margin-bottom: 3px;
+      display: inline-block; margin-right: 3px; line-height: 1.6;
+    }
+    .wf-friction {
+      margin-top: 6px; font-size: 10px; color: var(--red);
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      border-radius: 4px; padding: 4px 7px; line-height: 1.4;
+    }
+    .wf-friction-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .wf-arrow {
+      flex-shrink: 0; display: flex; align-items: flex-start;
+      padding: 0 4px; color: #cbd5e1; font-size: 16px; padding-top: 22px;
+    }
+    .wf-best-practices {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; margin-top: 16px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .wf-bp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); flex-shrink: 0; }
+    .wf-bp-step { font-size: 11px; color: var(--text); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .wf-bp-arrow { color: #cbd5e1; font-size: 12px; }
+
+    /* ── BUILDER JOURNEY ── */
+    .bj-wrap { overflow-x: auto; padding-bottom: 8px; }
+    .bj-grid { display: flex; gap: 10px; min-width: 1100px; padding: 4px 0 8px; }
+    .bj-card {
+      flex: 1; min-width: 130px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 10px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+    }
+    .bj-card.done     { border-top: 3px solid var(--green); }
+    .bj-card.deferred { border-top: 3px solid var(--yellow); }
+    .bj-phase-num { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .bj-phase-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
+    .bj-steps { font-size: 11px; color: var(--muted); line-height: 1.5; flex: 1; }
+    .bj-outcome { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 600; }
+    .bj-outcome.done     { color: var(--green); }
+    .bj-outcome.deferred { color: var(--yellow); }
+    .bj-deferred {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      background: var(--orange-bg); color: var(--orange);
+      border: 1px solid var(--orange-border);
+      border-radius: 4px; padding: 2px 6px; margin-top: 4px;
+    }
+    .bj-learnings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .bj-chip {
+      font-size: 11px; background: var(--purple-bg); color: var(--purple);
+      border: 1px solid var(--purple-border); border-radius: 4px;
+      padding: 3px 8px; font-weight: 500;
+    }
+
+    /* ── CITATION CHIPS ── */
+    .cite {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      padding: 1px 5px; border-radius: 3px; margin-left: 3px;
+      vertical-align: middle; letter-spacing: 0.3px;
+      background: var(--blue-bg); color: var(--blue);
+      border: 1px solid var(--blue-border); cursor: default;
+    }
+    .cite.pdf { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-border); }
+
+    /* ── DATA PENDING ── */
+    .jm-pending-cell {
+      padding: 14px 16px; background: var(--surface2);
+      border-bottom: 1px solid var(--border); vertical-align: middle;
+    }
+    .jm-pending-msg { font-size: 12px; color: var(--muted); font-style: italic; line-height: 1.5; }
+    .jm-pending-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      background: var(--surface); color: var(--muted);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 7px; margin-bottom: 6px;
+    }
+
+    /* ── SOURCES LEGEND ── */
+    .sources-legend {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px; box-shadow: var(--shadow);
+    }
+    .sources-legend table { width: 100%; border-collapse: collapse; }
+    .sources-legend td { padding: 5px 10px; font-size: 12px; vertical-align: top; color: var(--muted); }
+    .sources-legend td:first-child {
+      font-weight: 700; white-space: nowrap; width: 50px;
+      font-family: 'SFMono-Regular', 'Consolas', monospace;
+    }
+    .sources-legend td.pdf-key { color: var(--purple); }
+    .sources-legend td.src-key { color: var(--blue); }
+    .sources-legend tr { border-bottom: 1px solid var(--border); }
+    .sources-legend tr:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">SN</div>
+    <div>
+      <div class="header-title">ServiceNow App Engine — Analysis Dashboard</div>
+      <div class="header-sub">Cornell DTI × ServiceNow · Spring 2026 (Feb – May 2026) · Client: Sridhar Ravichandran</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="tag">Nishchay · Michelle · Jenny · Yani</span>
+    <span class="badge badge-yellow">Phase 1 Complete</span>
+    <span class="badge badge-blue">Mid-Point: Mar 24–26</span>
+    <span class="badge badge-green">Updated: Mar 21, 2026</span>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('journey', this)">Journey Map</button>
+  <button class="tab-btn" onclick="switchTab('findings', this)">Analysis</button>
+  <button class="tab-btn" onclick="switchTab('bap', this)">BAP Framework</button>
+  <button class="tab-btn" onclick="switchTab('competitive', this)">Competitive</button>
+  <button class="tab-btn" onclick="switchTab('ecosystem', this)">Ecosystem Map</button>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB 1: OVERVIEW                                 -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-overview" class="tab-content active">
+
+  <div class="overview-grid">
+
+    <!-- Weekly Snapshot -->
+    <div>
+      <div class="section">
+        <div class="section-label">Weekly Snapshot — Week of Mar 17</div>
+        <div class="week-box">
+          <div class="week-label done">✓ Done</div>
+          <div class="week-item">First Draft Analysis v2 completed &amp; reviewed</div>
+          <div class="week-item">X/Twitter insights report (150 tweets) finalized</div>
+          <div class="week-item">App Engine ecosystem diagram (Excalidraw) built</div>
+          <div class="week-item">Abstract user journey map completed</div>
+        </div>
+        <div class="week-box">
+          <div class="week-label prog">⏳ In Progress</div>
+          <div class="week-item">Competitor journey maps (Lovable / Replit / Bolt)</div>
+          <div class="week-item">No-Code / Low-Code / Pro-Code user personas</div>
+        </div>
+        <div class="week-box">
+          <div class="week-label block">◻ Not Started</div>
+          <div class="week-item">Use Case Library compilation</div>
+          <div class="week-item">Adoption &amp; Readiness Framework draft</div>
+          <div class="week-item">Prioritization Framework (impact vs. feasibility)</div>
+          <div class="week-item">Executive Summary</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Milestones -->
+    <div>
+      <div class="section">
+        <div class="section-label">Key Milestones</div>
+        <div class="card">
+          <div class="milestone-row">
+            <div class="milestone-dot" style="background:var(--green)"></div>
+            <div>
+              <div class="milestone-date">Mar 2, 2026</div>
+              <div class="milestone-title">✓ Phase 1 Check-in</div>
+              <div class="milestone-sub">Preliminary findings presented for feedback</div>
+            </div>
+          </div>
+          <div class="milestone-row">
+            <div class="milestone-dot" style="background:var(--yellow); box-shadow:0 0 6px rgba(202,138,4,0.4)"></div>
+            <div>
+              <div class="milestone-date">Mar 24–26, 2026</div>
+              <div class="milestone-title">⏳ Mid-Point Presentation</div>
+              <div class="milestone-sub">Validated journey map + adoption framework due</div>
+            </div>
+          </div>
+          <div class="milestone-row">
+            <div class="milestone-dot" style="background:var(--blue)"></div>
+            <div>
+              <div class="milestone-date">April 2026</div>
+              <div class="milestone-title">→ Phase 3</div>
+              <div class="milestone-sub">Strategy development, prioritized recs, executive summary</div>
+            </div>
+          </div>
+          <div class="milestone-row">
+            <div class="milestone-dot" style="background:#cbd5e1"></div>
+            <div>
+              <div class="milestone-date">May 11–13, 2026</div>
+              <div class="milestone-title">→ Final Presentation</div>
+              <div class="milestone-sub">Complete deliverable package to ServiceNow</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Deliverables (full width) -->
+    <div class="full-width">
+      <div class="section">
+        <div class="section-label">Main Deliverables</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Competitive Journey Maps</div>
+                <div class="del-type">Main Deliverable · Research</div>
+              </div>
+              <div class="status-dot dot-todo"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>TBD</span></div>
+              <div class="del-due">Due: <span>End of March</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">End-to-End ServiceNow Journey Map</div>
+                <div class="del-type">Main Deliverable · Journey Mapping</div>
+              </div>
+              <div class="status-dot dot-prog"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>Team</span></div>
+              <div class="del-due">Status: <span>Abstract done → Comprehensive in progress</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Use Case Library</div>
+                <div class="del-type">Main Deliverable · Research</div>
+              </div>
+              <div class="status-dot dot-todo"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>TBD</span></div>
+              <div class="del-due">Due: <span>April</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Adoption &amp; Readiness Framework (BAP)</div>
+                <div class="del-type">Main Deliverable · Strategy</div>
+              </div>
+              <div class="status-dot dot-todo"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>TBD</span></div>
+              <div class="del-due">Due: <span>April</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Insights &amp; Recommendations</div>
+                <div class="del-type">Main Deliverable · Analysis</div>
+              </div>
+              <div class="status-dot dot-prog"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>Nishchay</span></div>
+              <div class="del-due">Status: <span>First Draft v2 complete — needs primary validation</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Prioritization Framework</div>
+                <div class="del-type">Main Deliverable · Strategy</div>
+              </div>
+              <div class="status-dot dot-todo"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>TBD</span></div>
+              <div class="del-due">Due: <span>April</span></div>
+            </div>
+          </div>
+
+          <div class="deliverable" style="grid-column:1/-1;">
+            <div class="del-header">
+              <div>
+                <div class="del-title">Executive Summary</div>
+                <div class="del-type">Main Deliverable · Communication</div>
+              </div>
+              <div class="status-dot dot-todo"></div>
+            </div>
+            <div class="del-meta">
+              <div class="del-owner">Owner: <span>TBD</span></div>
+              <div class="del-due">Due: <span>May 11–13 Final Presentation</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Steps (full width) -->
+    <div class="full-width">
+      <div class="section">
+        <div class="section-label">Next Steps &amp; Open Items</div>
+        <div class="next-step-item">
+          <div class="ns-tag priority">Priority</div>
+          <div class="ns-body"><strong>Complete competitor journey maps</strong> (Lovable / Replit / Bolt) before Mar 24–26 mid-point presentation</div>
+        </div>
+        <div class="next-step-item">
+          <div class="ns-tag gap">Gap</div>
+          <div class="ns-body"><strong>No primary research yet</strong> — customer interviews needed to validate friction points identified in secondary research</div>
+        </div>
+        <div class="next-step-item">
+          <div class="ns-tag client">Client</div>
+          <div class="ns-body"><strong>X data weakness is a compelling story</strong> — lead with it in next Sridhar update to frame ServiceNow's organic community gap</div>
+        </div>
+        <div class="next-step-item">
+          <div class="ns-tag bap">BAP</div>
+          <div class="ns-body"><strong>Define observable signals &amp; metrics per stage</strong> before framework is built — what does "retained" actually look like in telemetry?</div>
+        </div>
+        <div class="next-step-item">
+          <div class="ns-tag team">Team</div>
+          <div class="ns-body"><strong>Assign owners to unowned deliverables</strong> before next sync — 5 of 7 deliverables still have TBD owners</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB: JOURNEY MAP                                -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-journey" class="tab-content">
+
+  <!-- ── SECTION 1: PRO-CODE WORKFLOW DIAGRAM ── -->
+  <div class="section">
+    <div class="section-label">Section 1 — Pro-Code Developer Workflow</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Generic SNC CLI workflow for a ServiceNow Pro-Code developer — 7 phases from environment setup to production maintenance. <span class="cite pdf">PDF §1–7</span></p>
+    <div class="wf-wrap">
+      <div class="wf-flow">
+
+        <!-- Phase 1 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#e0f2fe;color:#0369a1;">1</div>
+                <div class="wf-name">Environment<br>Setup</div>
+              </div>
+              <ul class="wf-tools">
+                <li>npm i -g @sn/cli</li>
+                <li>snc configure</li>
+                <li>snc create project</li>
+              </ul>
+              <div class="wf-friction"><span class="wf-friction-label">Friction</span> <span class="cite">S4</span><br>PDI slow spin-up &amp; unexpected resets break first-session flow</div>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 2 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#ede9fe;color:#7c3aed;">2</div>
+                <div class="wf-name">Core<br>Development</div>
+              </div>
+              <ul class="wf-tools">
+                <li>Fluent API (.now.ts)</li>
+                <li>GlideRecord</li>
+                <li>snc build --watch</li>
+              </ul>
+              <div class="wf-friction"><span class="wf-friction-label">Friction</span> <span class="cite">S3</span><br>"IDE feels like 2012" — browser IDE vs. VS Code/JetBrains</div>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 3 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#dcfce7;color:#16a34a;">3</div>
+                <div class="wf-name">Advanced<br>Patterns</div>
+              </div>
+              <ul class="wf-tools">
+                <li>TypeScript interfaces</li>
+                <li>Modular architecture</li>
+                <li>React + @sn/ui-kit</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 4 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#fefce8;color:#ca8a04;">4</div>
+                <div class="wf-name">Testing<br>&amp; QA</div>
+              </div>
+              <ul class="wf-tools">
+                <li>ATF (@sn/sdk/core)</li>
+                <li>Jest unit tests</li>
+                <li>ESLint @sn/config</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 5 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#fee2e2;color:#dc2626;">5</div>
+                <div class="wf-name">Build &amp; Deploy<br>Pipeline</div>
+              </div>
+              <ul class="wf-tools">
+                <li>now.config.json</li>
+                <li>snc deploy --profile</li>
+                <li>GitHub Actions</li>
+              </ul>
+              <div class="wf-friction"><span class="wf-friction-label">Friction</span> <span class="cite">S2</span><br>No native Git path; CI/CD must be manually configured</div>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 6 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#fff7ed;color:#ea580c;">6</div>
+                <div class="wf-name">Advanced<br>Features</div>
+              </div>
+              <ul class="wf-tools">
+                <li>snc develop --hot-reload</li>
+                <li>snc sync --continuous</li>
+                <li>DebugUtils</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="wf-arrow">→</div>
+
+        <!-- Phase 7 -->
+        <div class="wf-step">
+          <div class="wf-box-wrap">
+            <div class="wf-box">
+              <div class="wf-box-header">
+                <div class="wf-num" style="background:#f0fdfa;color:#0d9488;">7</div>
+                <div class="wf-name">Production &amp;<br>Maintenance</div>
+              </div>
+              <ul class="wf-tools">
+                <li>PerformanceMonitor</li>
+                <li>ErrorHandler</li>
+                <li>Event queue logging</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end wf-flow -->
+    </div><!-- end wf-wrap -->
+
+    <div class="wf-best-practices">
+      <span class="wf-bp-label">Best Practices <span class="cite pdf">PDF</span></span>
+      <span class="wf-bp-step">Requirements <span class="wf-bp-arrow">→</span></span>
+      <span class="wf-bp-step">Core Logic <span class="wf-bp-arrow">→</span></span>
+      <span class="wf-bp-step">Security <span class="wf-bp-arrow">→</span></span>
+      <span class="wf-bp-step">Build UI <span class="wf-bp-arrow">→</span></span>
+      <span class="wf-bp-step">Test Thoroughly <span class="wf-bp-arrow">→</span></span>
+      <span class="wf-bp-step">Deploy Safely</span>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: ACTUAL BUILDER JOURNEY ── -->
+  <div class="section">
+    <div class="section-label">Section 2 — Actual Builder Journey: Custom Incident Management System</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Nishchay's real hands-on build — 8 phases documented end-to-end. <span class="cite pdf">PDF Part 2</span> &nbsp; Green = completed &nbsp; Yellow = deferred/friction</p>
+    <div class="bj-wrap">
+      <div class="bj-grid">
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 1 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Discovery &amp; Requirements</div>
+          <div class="bj-steps">Goal: onboard via hands-on dev. Solution chosen: incident management system. Requirements: 3 incident types, auto-routing, priority escalation, notifications, resolution metrics.</div>
+          <div class="bj-outcome done">✓ Requirements documented</div>
+        </div>
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 2 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Application Creation</div>
+          <div class="bj-steps">Created new SN app "Custom Incident Management System". Scope: <code style="font-size:10px;">x_1939502_custom_i</code></div>
+          <div class="bj-outcome done">✓ App created in instance</div>
+        </div>
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 3 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Data Model Design</div>
+          <div class="bj-steps">Table <code style="font-size:10px;">x_1939502_custom_i_incident</code> extending <code style="font-size:10px;">task</code>. Auto-numbering INC1000000+. Fields: Category, Priority, Impact, Urgency, Assignment Group, Escalation/Resolution tracking.</div>
+          <div class="bj-outcome done">✓ Table schema complete</div>
+        </div>
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 4 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Security &amp; Access Control</div>
+          <div class="bj-steps">3 roles: <code style="font-size:10px;">incident_manager</code>, <code style="font-size:10px;">incident_agent</code>, <code style="font-size:10px;">incident_reporter</code>. ACLs: Read/Create/Write/Delete with condition-based controls.</div>
+          <div class="bj-outcome done">✓ RBAC model deployed</div>
+        </div>
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 5 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Business Logic &amp; Automation</div>
+          <div class="bj-steps">Server module <code style="font-size:10px;">incident-functions.js</code>. 4 business rules: Assignment Notification, Priority Calculation, Status Change Handler, Escalation Check.</div>
+          <div class="bj-outcome done">✓ Business logic live</div>
+        </div>
+
+        <div class="bj-card deferred">
+          <div class="bj-phase-num">Phase 6 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Automation Jobs <em style="font-size:10px;color:var(--muted);">(Attempted)</em></div>
+          <div class="bj-steps">Planned: scheduled escalation job — check unassigned every 30 min, escalate critical after 2hr.</div>
+          <div class="bj-outcome deferred">⚠ Deferred</div>
+          <span class="bj-deferred">Friction Point — SDK compatibility issue</span>
+        </div>
+
+        <div class="bj-card deferred">
+          <div class="bj-phase-num">Phase 7 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Sample Data &amp; Testing <em style="font-size:10px;color:var(--muted);">(Attempted)</em></div>
+          <div class="bj-steps">Planned: 4 sample incidents across incident types and priorities for end-to-end testing.</div>
+          <div class="bj-outcome deferred">⚠ Deferred</div>
+          <span class="bj-deferred">Friction Point — Record API type constraints</span>
+        </div>
+
+        <div class="bj-card done">
+          <div class="bj-phase-num">Phase 8 <span class="cite pdf">PDF</span></div>
+          <div class="bj-phase-title">Build &amp; Deployment</div>
+          <div class="bj-steps"><code style="font-size:10px;">snc build</code> → compiled successfully. <code style="font-size:10px;">snc deploy</code> → deployed to dev instance.</div>
+          <div class="bj-outcome done">✓ Live at dev212337.service-now.com</div>
+        </div>
+
+      </div><!-- end bj-grid -->
+    </div><!-- end bj-wrap -->
+
+    <div class="bj-learnings">
+      <span style="font-size:11px;font-weight:700;color:var(--muted);margin-right:4px;">Key Learning Outcomes <span class="cite pdf">PDF</span>:</span>
+      <span class="bj-chip">Table schema design</span>
+      <span class="bj-chip">RBAC + roles</span>
+      <span class="bj-chip">ACL conditions</span>
+      <span class="bj-chip">Business rules</span>
+      <span class="bj-chip">GlideRecord</span>
+      <span class="bj-chip">Event queuing</span>
+      <span class="bj-chip">snc build/deploy</span>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: SWIMLANE ── -->
+  <div class="section">
+    <div class="section-label">Section 3 — Builder Journey Map by Persona</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Pro-Code row is sourced &amp; cited. No-Code and Low-Code require primary research before data can be populated.</p>
+
+  <div style="margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;">
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block;"></span> Positive</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block;"></span> Neutral</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--yellow);display:inline-block;"></span> Frustrated</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block;"></span> At Risk</span>
+  </div>
+
+  <div class="jm-wrap">
+  <table class="jm-table">
+    <colgroup>
+      <col style="width:110px">
+      <col><col><col><col><col><col>
+    </colgroup>
+
+    <!-- STAGE HEADERS -->
+    <thead>
+      <tr>
+        <th class="jm-stage-header" style="border-right:2px solid var(--border);"></th>
+        <th class="jm-stage-header" style="border-right:1px solid var(--border);">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#e0f2fe;color:#0369a1;">0</span>Discovery</div>
+          <div class="jm-stage-sub">Awareness &amp; first impression</div>
+        </th>
+        <th class="jm-stage-header" style="border-right:1px solid var(--border);">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#ede9fe;color:#7c3aed;">1</span>Onboarding</div>
+          <div class="jm-stage-sub">Sign-up, PDI, tool choice</div>
+        </th>
+        <th class="jm-stage-header" style="border-right:1px solid var(--border);">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#dcfce7;color:#16a34a;">2</span>Activation</div>
+          <div class="jm-stage-sub">First working app</div>
+        </th>
+        <th class="jm-stage-header" style="border-right:1px solid var(--border);">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#fefce8;color:#ca8a04;">3</span>Retention</div>
+          <div class="jm-stage-sub">Repeat builds, complexity</div>
+        </th>
+        <th class="jm-stage-header" style="border-right:1px solid var(--border);">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#fee2e2;color:#dc2626;">4</span>Graduation</div>
+          <div class="jm-stage-sub">Prototype → production</div>
+        </th>
+        <th class="jm-stage-header">
+          <div class="jm-stage-name"><span class="jm-stage-num" style="background:#f0fdfa;color:#0d9488;">5</span>Advocacy</div>
+          <div class="jm-stage-sub">Return &amp; word-of-mouth</div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+    <!-- ── NO-CODE ROW — DATA PENDING ── -->
+    <tr>
+      <td class="jm-persona-label">
+        <div class="jm-persona-name" style="color:var(--blue);">No-Code</div>
+        <div class="jm-persona-role">Business Automator</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">BA · Ops Mgr · HR Lead</div>
+      </td>
+      <td class="jm-pending-cell" colspan="6">
+        <div class="jm-pending-badge">Data Pending</div>
+        <div class="jm-pending-msg">No journey data collected for this persona. Primary research (customer interviews, UX benchmarks) required before this row can be populated. Target: Phase 2 research sprint.</div>
+      </td>
+    </tr>
+    <tr class="jm-arc-row">
+      <td style="border-right:2px solid var(--border);padding:0;"></td>
+      <td colspan="6" style="background:#f1f5f9;border-bottom:2px solid var(--border);"></td>
+    </tr>
+
+    <!-- ── LOW-CODE ROW — DATA PENDING ── -->
+    <tr>
+      <td class="jm-persona-label">
+        <div class="jm-persona-name" style="color:var(--yellow);">Low-Code</div>
+        <div class="jm-persona-role">Citizen Developer</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">IT Admin · Tech BA · Power User</div>
+      </td>
+      <td class="jm-pending-cell" colspan="6">
+        <div class="jm-pending-badge">Data Pending</div>
+        <div class="jm-pending-msg">No journey data collected for this persona. Primary research (customer interviews, UX benchmarks) required before this row can be populated. Target: Phase 2 research sprint.</div>
+      </td>
+    </tr>
+    <tr class="jm-arc-row">
+      <td style="border-right:2px solid var(--border);padding:0;"></td>
+      <td colspan="6" style="background:#f1f5f9;border-bottom:2px solid var(--border);"></td>
+    </tr>
+
+    <!-- ── PRO-CODE ROW ── -->
+    <tr>
+      <td class="jm-persona-label">
+        <div class="jm-persona-name" style="color:var(--purple);">Pro-Code</div>
+        <div class="jm-persona-role">Platform Developer</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">SN Dev · Full-Stack · Architect</div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Employer-assigned or evaluating for a client project. Pragmatic — wants to know if it's a real dev platform or just a GUI tool. Compares to VS Code + GitHub. <span class="cite">S3</span></div>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">SN perceived as enterprise legacy vs. modern dev tooling <span class="cite">S2</span></span>
+        <span class="jm-tag enabler">Enabler</span><span class="jm-tag-text">25-year enterprise trust + RBAC + existing SN modules <span class="cite">S1</span></span>
+        <div><span class="jm-emotion neutral">● Evaluating</span></div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Sets up PDI or uses company SN instance. Goes straight to Creator Studio / IDE. Immediately frustrated by the browser-based IDE that "feels like 2012." <span class="cite">S3</span></div>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">Creator Studio IDE feels dated vs. VS Code / JetBrains <span class="cite">S3</span></span>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">No native Git integration from the start <span class="cite">S2</span></span>
+        <div><span class="jm-emotion friction">● Frustrated</span></div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Builds in Creator Studio. App is functional. IDE limitations already visible — no local dev, no proper autocomplete, no CI preview. <span class="cite pdf">PDF</span></div>
+        <span class="jm-tag enabler">Enabler</span><span class="jm-tag-text">Build Agent useful for scaffolding boilerplate quickly <span class="cite">S1</span></span>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">Build Agent output for complex logic = needs rewrite <span class="cite">S3</span></span>
+        <div><span class="jm-emotion neutral">● Functional</span></div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Platform IDE limitations compound. No CI/CD, no native Git, no local testing. Can push through technically but the experience is friction-heavy compared to other stacks. <span class="cite">S2</span></div>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">No CI/CD pipeline; manual deployment steps <span class="cite">S2</span></span>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">Feels locked into proprietary GUI tooling <span class="cite">S4</span></span>
+        <span class="jm-tag enabler">Enabler</span><span class="jm-tag-text">Can solve complex problems if they push through <span class="cite">S3</span></span>
+        <div><span class="jm-emotion friction">● Grinding</span></div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Closest persona to enterprise deployment. Can navigate AEMC. But needs a real DevOps pipeline — staging, rollback, environment parity — which doesn't exist natively. <span class="cite pdf">PDF</span></div>
+        <span class="jm-tag friction">Friction</span><span class="jm-tag-text">No native dev → staging → prod pipeline <span class="cite">S2</span></span>
+        <span class="jm-tag enabler">Enabler</span><span class="jm-tag-text">AEMC + App Lifecycle Management handles governance <span class="cite">S1</span></span>
+        <div><span class="jm-emotion neutral">● Almost There</span></div>
+      </td>
+      <td class="jm-cell">
+        <div class="jm-action">Most likely to advocate publicly. Tech blog posts, conference talks, community contributions. But only if the experience was good — IDE friction is a major deterrent. <span class="cite">S4</span></div>
+        <span class="jm-tag enabler">Enabler</span><span class="jm-tag-text">NowCommunity, tech blogs, internal champion potential <span class="cite">S1</span></span>
+        <span class="jm-tag risk">Risk</span><span class="jm-tag-text">IDE/DevOps frustration → publicly negative review <span class="cite">S4</span></span>
+        <div><span class="jm-emotion positive">● Vocal (either way)</span></div>
+      </td>
+    </tr>
+
+    <!-- Emotion arc: Pro-Code -->
+    <tr class="jm-arc-row" style="border-bottom:2px solid var(--border);">
+      <td style="border-right:2px solid var(--border);padding:0;"></td>
+      <td class="jm-arc-cell" style="background:#bfdbfe;" title="Evaluating"></td>
+      <td class="jm-arc-cell" style="background:#fecaca;" title="Frustrated"></td>
+      <td class="jm-arc-cell" style="background:#e2e8f0;" title="Functional"></td>
+      <td class="jm-arc-cell" style="background:#fde68a;" title="Grinding"></td>
+      <td class="jm-arc-cell" style="background:#bfdbfe;" title="Almost There"></td>
+      <td class="jm-arc-cell" style="background:#bbf7d0;" title="Vocal"></td>
+    </tr>
+
+    <!-- ── BUILD AGENT IMPACT ROW ── -->
+    <tr>
+      <td class="jm-ba-label">
+        <div style="font-size:11px;font-weight:700;color:#92400e;">Build Agent</div>
+        <div style="font-size:10px;color:#b45309;margin-top:2px;">AI Intervention Points</div>
+      </td>
+      <td class="jm-ba-cell"><div class="jm-ba-text">Surface Build Agent head-on in marketing vs. Lovable/Bolt — "enterprise AI, not just vibe coding" <span class="cite">S1</span></div></td>
+      <td class="jm-ba-cell"><div class="jm-ba-text"><strong>Make Build Agent the default entry point</strong> — route new users to AI prompt before showing tool menu <span class="cite">S1</span></div></td>
+      <td class="jm-ba-cell"><div class="jm-ba-text">AI prompt → working prototype in minutes. Eliminates cold-start; bridges early scripting for Low-Code <span class="cite pdf">PDF</span> <span class="cite">S1</span></div></td>
+      <td class="jm-ba-cell"><div class="jm-ba-text"><strong>Build Agent as scripting tutor</strong> — explains generated code instead of just outputting it, turning the cliff into a learning slope <span class="cite">S1</span></div></td>
+      <td class="jm-ba-cell"><div class="jm-ba-text">Generate AEMC-ready scaffolding + governance checklist automatically. "Your app is production-ready" signal <span class="cite">S1</span></div></td>
+      <td class="jm-ba-cell"><div class="jm-ba-text">Build Agent success stories → seed community content. Amplify "shipped in days" narratives that are real but not spreading <span class="cite">S4</span></div></td>
+    </tr>
+
+    </tbody>
+  </table>
+  </div><!-- end jm-wrap -->
+
+  <!-- Cross-persona summary -->
+  <div style="margin-top:20px;margin-bottom:24px;">
+    <div class="section-label">Cross-Persona Patterns <span class="cite">S3</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;">
+      <div class="insight-card blue">
+        <div class="ic-title">Primary Drop-off Point</div>
+        <div class="ic-body">
+          <strong>No-Code:</strong> Complexity cliff (Retention) — <em>data pending</em><br>
+          <strong>Low-Code:</strong> Governance/tool confusion — <em>data pending</em><br>
+          <strong>Pro-Code:</strong> DevOps + IDE limitations (Retention) <span class="cite">S2</span>
+        </div>
+      </div>
+      <div class="insight-card yellow">
+        <div class="ic-title">Graduation Likelihood</div>
+        <div class="ic-body">
+          <strong>No-Code:</strong> Lowest — needs IT to self-graduate<br>
+          <strong>Low-Code:</strong> Medium — can navigate with help<br>
+          <strong>Pro-Code:</strong> Highest — can force through <span class="cite">S3</span>
+        </div>
+      </div>
+      <div class="insight-card green">
+        <div class="ic-title">Build Agent Leverage</div>
+        <div class="ic-body">
+          <strong>No-Code:</strong> Highest — does scripting for them<br>
+          <strong>Low-Code:</strong> High — bridges the cliff<br>
+          <strong>Pro-Code:</strong> Medium — scaffolding only <span class="cite">S1</span>
+        </div>
+      </div>
+      <div class="insight-card purple">
+        <div class="ic-title">Governance Perception</div>
+        <div class="ic-body">
+          <strong>No-Code:</strong> A wall<br>
+          <strong>Low-Code:</strong> Mixed — outsider process<br>
+          <strong>Pro-Code:</strong> Should be invisible <span class="cite">S3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end section 3 -->
+
+  <!-- ── SECTION 4: SOURCES LEGEND ── -->
+  <div class="section">
+    <div class="section-label">Section 4 — Sources</div>
+    <div class="sources-legend">
+      <table>
+        <tr>
+          <td class="pdf-key">[PDF]</td>
+          <td><strong>ServiceNow IDE Pro Developer Journey — Complete Workflow</strong> (Nishchay Vishwanath, 2026). Primary source: hands-on developer journey documenting real build of a Custom Incident Management System.</td>
+        </tr>
+        <tr>
+          <td class="src-key">[S1]</td>
+          <td><strong>context/servicenow-product.md</strong> — ServiceNow product knowledge base (compiled from First Draft Analysis v2 + official SN documentation). Covers AES, Creator Studio, Build Agent, PDI, AEMC, AEU.</td>
+        </tr>
+        <tr>
+          <td class="src-key">[S2]</td>
+          <td><strong>First Draft Analysis v2</strong> (Feb 25, 2026) — 40+ secondary sources including G2 reviews, NowCommunity forums, industry reports, and competitive benchmarks. Via context/findings-summary.md.</td>
+        </tr>
+        <tr>
+          <td class="src-key">[S3]</td>
+          <td><strong>context/personas.md</strong> — Pro-Code, Low-Code, No-Code persona profiles. Representative quotes are directional hypotheses pending primary research validation.</td>
+        </tr>
+        <tr>
+          <td class="src-key">[S4]</td>
+          <td><strong>X/Twitter Signal Report</strong> (Mar 2026) — 150 tweets analyzed, Jan 2024–Mar 2026. Via context/x-signal-summary.md. Covers organic engagement, brand vs. practitioner voice breakdown.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end journey map tab -->
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB 2: ANALYSIS (formerly Findings)             -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-findings" class="tab-content">
+
+  <!-- SYNTHESIS -->
+  <div class="section">
+    <div class="section-label">Synthesis — What This Means</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="insight-card red">
+        <div class="ic-title">The Core Tension</div>
+        <div class="ic-body">Users expect vibe-coding magic. ServiceNow requires enterprise discipline. <strong>Build Agent is the bet to close this gap</strong> — but only if it's the default entry point, not a hidden feature.</div>
+      </div>
+      <div class="insight-card orange">
+        <div class="ic-title">The #1 Lever</div>
+        <div class="ic-body">The complexity cliff is not a product bug — it's a <strong>positioning and UX gap</strong>. The jump from drag-and-drop to scripting is a cliff without a bridge. Build Agent is that bridge if surfaced correctly.</div>
+      </div>
+      <div class="insight-card purple">
+        <div class="ic-title">The Differentiator at Risk</div>
+        <div class="ic-body">ServiceNow's governance-first approach (AEMC) is a genuine enterprise moat. But it currently feels like a wall. <strong>Making governance invisible — not absent — is the strategic imperative.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="findings-grid">
+
+    <!-- ACTIVATION -->
+    <div class="findings-col">
+      <div class="findings-col-title" style="border-bottom-color:var(--blue);">
+        <span style="color:var(--blue)">① Activation</span>
+        <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px;">Discovery → First working app</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--yellow)">~30m</div>
+          <div class="stat-lbl">First app<br>build time</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--red)">54</div>
+          <div class="stat-lbl">G2 mentions:<br>Learning Curve</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--green)">106</div>
+          <div class="stat-lbl">G2 mentions:<br>Ease of Use</div>
+        </div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">High Friction</div>
+        <div class="ic-title">Steep Onboarding for Non-SN Users</div>
+        <div class="ic-body">Requires understanding scoped apps, update sets, and SN data model — unlike standalone tools (Power Apps, Lovable).</div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">PDI Reliability</div>
+        <div class="ic-title">Developer Instance Issues</div>
+        <div class="ic-body">Recurring scope conflicts and licensing errors in community forums. Kills first-session momentum.</div>
+      </div>
+      <div class="insight-card yellow">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--yellow)">Tool Confusion</div>
+        <div class="ic-title">Which Tool to Use?</div>
+        <div class="ic-body">Creator Studio vs. App Engine Studio vs. IDE + Build Agent — relationship not clear to newcomers.</div>
+      </div>
+      <div class="insight-card green">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--green)">Strength</div>
+        <div class="ic-title">Templates &amp; Drag-and-Drop</div>
+        <div class="ic-body">Starting from templates significantly reduces time-to-first-app. Built-in SN module integration eliminates integration complexity.</div>
+      </div>
+    </div>
+
+    <!-- RETENTION -->
+    <div class="findings-col">
+      <div class="findings-col-title" style="border-bottom-color:var(--yellow);">
+        <span style="color:var(--yellow)">② Retention</span>
+        <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px;">Repeat building → Complexity progression</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--red)">#1</div>
+          <div class="stat-lbl">Drop-off<br>cause</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--muted)">65%</div>
+          <div class="stat-lbl">X/Twitter:<br>Branded posts</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--yellow)">15%</div>
+          <div class="stat-lbl">X/Twitter:<br>Organic voice</div>
+        </div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">Critical</div>
+        <div class="ic-title">The "Complexity Cliff"</div>
+        <div class="ic-body">Users build simple apps, then hit a wall when advanced customization requires scripting. Contradicts the low-code promise. Most cited negative theme.</div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">Tool Conflict</div>
+        <div class="ic-title">AES vs. Legacy Studio IDE</div>
+        <div class="ic-body">Developers using both environments encounter update set conflicts, limiting team collaboration.</div>
+      </div>
+      <div class="insight-card yellow">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--yellow)">Signal Risk</div>
+        <div class="ic-title">Multi-Platform Reality</div>
+        <div class="ic-body">Highest organic X tweet (551 views): "My office has 2 low-code platforms — Salesforce &amp; ServiceNow." Switching costs are low.</div>
+      </div>
+      <div class="insight-card yellow">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--yellow)">Cost</div>
+        <div class="ic-title">Licensing Uncertainty</div>
+        <div class="ic-body">Consumption-based pricing (AEUs) creates unpredictability. Perceived as expensive vs. alternatives.</div>
+      </div>
+    </div>
+
+    <!-- X / TWITTER -->
+    <div class="findings-col">
+      <div class="findings-col-title" style="border-bottom-color:var(--purple);">
+        <span style="color:var(--purple)">③ X / Twitter Signal</span>
+        <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px;">150 tweets analyzed</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--blue)">150</div>
+          <div class="stat-lbl">Tweets<br>analyzed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--muted)">0.5</div>
+          <div class="stat-lbl">Avg likes<br>per tweet</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--orange)">17</div>
+          <div class="stat-lbl">Best tweet<br>likes</div>
+        </div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">Weak Activation</div>
+        <div class="ic-title">~65% Branded, Near-Zero Organic</div>
+        <div class="ic-body">Practitioners not sharing experiences. The silence is a signal — real-world activation gap between positioning and usage.</div>
+      </div>
+      <div class="insight-card red">
+        <span class="conf-badge conf-secondary">Secondary Research</span>
+        <div class="ic-signal" style="color:var(--red)">Credibility Risk</div>
+        <div class="ic-title">Direct Low-Code Skepticism</div>
+        <div class="ic-body">"Low code bullshit was already proving this... How many friends built actionable dashboards in ServiceNow?" — highest-engagement critical tweet (5 likes, 140 views).</div>
+      </div>
+      <div class="insight-card yellow">
+        <span class="conf-badge conf-hypothesis">Hypothesis</span>
+        <div class="ic-signal" style="color:var(--yellow)">Launch Gap</div>
+        <div class="ic-title">Agent Builder Announcement Underwhelmed</div>
+        <div class="ic-body">Major March 2025 AI agent builder launch: most posts &lt;15 views. Biggest vibe coding tweet: 11 views, 0 likes.</div>
+      </div>
+      <div class="insight-card green">
+        <span class="conf-badge conf-hypothesis">Hypothesis</span>
+        <div class="ic-signal" style="color:var(--green)">Latent Opportunity</div>
+        <div class="ic-title">Field Validation Exists — Not Amplified</div>
+        <div class="ic-body">"Departmental workflows IT never justified — now shipped in days with AI-assisted App Engine." 0 likes, 51 views. The insight is real; nobody's spreading it.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VALIDATION ROADMAP -->
+  <div class="section" style="margin-top:28px;">
+    <div class="section-label">Validation Roadmap — Primary Research Needed</div>
+    <div class="card">
+      <table class="val-table">
+        <thead>
+          <tr>
+            <th style="width:30%;">Finding</th>
+            <th style="width:12%;">Confidence</th>
+            <th style="width:22%;">Evidence So Far</th>
+            <th style="width:36%;">Validation Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Complexity cliff is the #1 drop-off cause</strong></td>
+            <td><span class="conf-high">High</span></td>
+            <td>G2 reviews (54 learning-curve mentions), X/Twitter sentiment, community forums</td>
+            <td>3–5 customer interviews with active builders; ask where they got stuck and whether they abandoned</td>
+          </tr>
+          <tr>
+            <td><strong>PDI reliability kills first-session momentum</strong></td>
+            <td><span class="conf-high">High</span></td>
+            <td>Community forum threads, developer complaints on NowCommunity</td>
+            <td>Hands-on PDI benchmark: timed activation test vs. Lovable/Bolt — record friction points firsthand</td>
+          </tr>
+          <tr>
+            <td><strong>Build Agent adoption is near-zero organically</strong></td>
+            <td><span class="conf-medium">Medium</span></td>
+            <td>X/Twitter: near-zero organic Build Agent posts post-launch (March 2025)</td>
+            <td>Internal telemetry request from Sridhar: Build Agent activation rates, session counts, drop-off stage</td>
+          </tr>
+          <tr>
+            <td><strong>AES/IDE conflicts frustrate teams</strong></td>
+            <td><span class="conf-medium">Medium</span></td>
+            <td>Community forum reports, G2 reviews mentioning update set issues</td>
+            <td>IT admin interviews (2–3): ask about tooling standards enforced and conflicts observed in the field</td>
+          </tr>
+          <tr>
+            <td><strong>AEMC adoption is low despite capability</strong></td>
+            <td><span class="conf-medium">Medium</span></td>
+            <td>Secondary inference: governance seen as complex in community, low AEMC-specific posts</td>
+            <td>Client data ask: AEMC activation rates, # of apps promoted to prod vs. stuck in sandbox</td>
+          </tr>
+          <tr>
+            <td><strong>No-code builders can't self-graduate to production</strong></td>
+            <td><span class="conf-medium">Medium</span></td>
+            <td>Personas inference + AEMC complexity signals from secondary research</td>
+            <td>Interviews with churned users and IT admins: what does the graduation ask actually look like?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB 3: BAP FRAMEWORK                            -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-bap" class="tab-content">
+
+  <div class="section">
+    <div class="section-label">Business Adoption Plan — Activation → Retention → Graduation</div>
+    <div class="bap-grid">
+
+      <!-- ACTIVATION -->
+      <div class="bap-stage">
+        <div class="bap-header">
+          <div class="bap-num" style="background:var(--blue-bg);color:var(--blue)">1</div>
+          <div>
+            <div class="bap-stage-title" style="color:var(--blue)">ACTIVATION</div>
+            <div class="bap-stage-sub">Discovery → First working app</div>
+          </div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--red)">⚡ Friction</div>
+          <div class="bap-row-body">Steep onboarding, PDI issues, tool confusion, 30-min expectation gap vs. Lovable (35 min)</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--green)">✓ Strength</div>
+          <div class="bap-row-body">Templates praised; single-platform SN integration is a real differentiator</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--blue)">→ Recommendation</div>
+          <div class="bap-row-body">Make Build Agent the default entry point; guided persona routing; fix PDI reliability</div>
+        </div>
+      </div>
+
+      <!-- RETENTION -->
+      <div class="bap-stage">
+        <div class="bap-header">
+          <div class="bap-num" style="background:var(--yellow-bg);color:var(--yellow)">2</div>
+          <div>
+            <div class="bap-stage-title" style="color:var(--yellow)">RETENTION</div>
+            <div class="bap-stage-sub">Repeat building → Complexity progression</div>
+          </div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--red)">⚡ Friction</div>
+          <div class="bap-row-body">Complexity cliff at scripting layer, AES vs IDE conflicts, performance at scale, cost uncertainty</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--green)">✓ Strength</div>
+          <div class="bap-row-body">Build Agent can be a bridge — turns cliff into a learning slope with code explanation</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--blue)">→ Recommendation</div>
+          <div class="bap-row-body">Progression templates (beginner → advanced); resolve IDE conflicts; Build Agent as scripting tutor</div>
+        </div>
+      </div>
+
+      <!-- GRADUATION -->
+      <div class="bap-stage">
+        <div class="bap-header">
+          <div class="bap-num" style="background:var(--red-bg);color:var(--red)">3</div>
+          <div>
+            <div class="bap-stage-title" style="color:var(--red)">GRADUATION</div>
+            <div class="bap-stage-sub">Prototype → Enterprise deployment</div>
+          </div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--red)">⚡ Friction</div>
+          <div class="bap-row-body">No clear DevOps path; IT admin resistance; unclear ownership; Creator Studio → AES rework needed</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--green)">✓ Strength</div>
+          <div class="bap-row-body">AEMC designed for this — but adoption of governance layer is itself low</div>
+        </div>
+        <div class="bap-row">
+          <div class="bap-row-label" style="color:var(--blue)">→ Recommendation</div>
+          <div class="bap-row-body">Automated prod-readiness checklist; graduated sandboxes; ownership model templates; invisible governance</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Observable Signals by Stage — To Be Defined</div>
+    <div class="signals-grid">
+      <div class="insight-card blue">
+        <div class="ic-title" style="color:var(--blue)">① Activation Signals</div>
+        <div class="ic-body">
+          First app created<br>
+          PDI setup completed<br>
+          First template used<br>
+          Build Agent first prompt
+        </div>
+      </div>
+      <div class="insight-card yellow">
+        <div class="ic-title" style="color:var(--yellow)">② Retention Signals</div>
+        <div class="ic-body">
+          2nd+ app created<br>
+          Scripting used<br>
+          Team member invited<br>
+          App shared with stakeholder
+        </div>
+      </div>
+      <div class="insight-card red">
+        <div class="ic-title" style="color:var(--red)">③ Graduation Signals</div>
+        <div class="ic-body">
+          AEMC intake submitted<br>
+          Prod deployment initiated<br>
+          App owned by team (not individual)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-card purple">
+    <div class="ic-title">Key Open Question</div>
+    <div class="ic-body">What observable signals does ServiceNow currently have telemetry access to? Internal usage data from Sridhar is needed to validate which signals are measurable vs. inferred.</div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB 4: COMPETITIVE                              -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-competitive" class="tab-content">
+
+  <div class="section">
+    <div class="section-label">Vibe Coding Competitor Landscape</div>
+    <div class="card">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Proto Time</th>
+            <th>Scale / Traction</th>
+            <th>Key Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="comp-name" style="color:var(--orange)">Lovable</span></td>
+            <td class="comp-time">~35 min</td>
+            <td><span class="comp-highlight">$200M ARR · $6.6B val</span></td>
+            <td class="comp-note">170 of 1,645 apps had security vulnerabilities — no enterprise governance</td>
+          </tr>
+          <tr>
+            <td><span class="comp-name" style="color:var(--yellow)">Bolt.new</span></td>
+            <td class="comp-time">~28 min</td>
+            <td><span class="comp-highlight">$40M ARR in 4.5 months</span></td>
+            <td class="comp-note">Token costs spike significantly during debug loops</td>
+          </tr>
+          <tr>
+            <td><span class="comp-name" style="color:var(--blue)">Replit</span></td>
+            <td class="comp-time">~45 min</td>
+            <td><span class="comp-highlight">40M users · $100M rev in 9mo</span></td>
+            <td class="comp-note">Azure SSO/RBAC partnership — moving toward enterprise</td>
+          </tr>
+          <tr>
+            <td><span class="comp-name" style="color:var(--muted)">Cursor</span></td>
+            <td class="comp-time">~65 min</td>
+            <td><span class="comp-highlight">$9.9B valuation</span></td>
+            <td class="comp-note">Devs 19% slower despite feeling 20% faster (METR study) — trust calibration issue</td>
+          </tr>
+          <tr>
+            <td><span class="comp-name" style="color:var(--green)">SN Build Agent</span></td>
+            <td class="comp-time">Minutes*</td>
+            <td><span class="comp-highlight" style="color:var(--green)">Governance built-in</span></td>
+            <td class="comp-note">4× usage growth expected · Powered by Claude · AEMC integration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="competitive-grid">
+
+    <div>
+      <div class="section">
+        <div class="section-label">Strategic Opening</div>
+        <div class="insight-card purple">
+          <div class="ic-title">The "Last Mile" Advantage</div>
+          <div class="ic-body">Consumer tools nail the "wow moment" but fail the "last mile." None produce production-ready code without manual finishing. ServiceNow's governance-first approach is the differentiator — but it must feel <strong>invisible</strong>, not burdensome.</div>
+        </div>
+        <div class="insight-card blue">
+          <div class="ic-title">Positioning Opportunity</div>
+          <div class="ic-body">While Lovable/Bolt are sprinting on speed-to-prototype, the uncontested ground is <strong>speed-to-production</strong>. No competitor owns this yet for enterprise workflows.</div>
+        </div>
+        <div class="insight-card teal">
+          <div class="ic-title">Build Agent as Moat</div>
+          <div class="ic-body">Competitors must build enterprise governance from scratch. ServiceNow already has AEMC, RBAC, update sets, and a 25-year enterprise trust layer. Build Agent is the activation layer on top of this.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section">
+        <div class="section-label">Highest-Value Use Cases (Preliminary)</div>
+        <div class="insight-card green">
+          <div class="ic-title">High Production Likelihood</div>
+          <div class="ic-body">
+            IT Service Request Automation<br>
+            Employee Onboarding / Offboarding<br>
+            Approval Workflows (CapEx, Procurement)<br>
+            Legacy System Replacement
+          </div>
+        </div>
+        <div class="insight-card yellow">
+          <div class="ic-title">Medium Production Likelihood</div>
+          <div class="ic-body">
+            Complaint / Case Management<br>
+            Custom Dashboards / Reporting<br>
+            Complex ERP / CRM Integrations
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Research Gaps — Phase 2 Priority</div>
+        <div class="insight-card blue">
+          <div class="ic-body">
+            Customer interviews (active + churned users)<br>
+            Build Agent hands-on UX benchmark<br>
+            IT admin governance perspective<br>
+            Internal usage telemetry from SN<br>
+            Competitive onboarding deep-dives (Power Apps, Mendix)
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- TAB 5: ECOSYSTEM MAP                            -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="tab-ecosystem" class="tab-content">
+
+  <div style="margin-bottom:16px;">
+    <div class="section-label">App Engine Ecosystem — Now Platform</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:0;">Visual map of all tools, layers, and tiers within ServiceNow App Engine. ★ = Starter &nbsp;·&nbsp; ◆ = Enterprise</p>
+  </div>
+
+  <!-- OUTER: Now Platform -->
+  <div style="border:2px solid #1d4ed8;border-radius:12px;background:#eff6ff;padding:16px 16px 12px;position:relative;">
+    <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:12px;letter-spacing:0.3px;">ServiceNow Now Platform</div>
+
+    <!-- INNER: App Engine -->
+    <div style="border:2px solid #0369a1;border-radius:10px;background:#e0f2fe;padding:14px 14px 10px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:14px;letter-spacing:0.3px;">App Engine — The Now Platform Builder Suite</div>
+
+      <!-- 6-box grid: 2 rows × 3 cols -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+
+        <!-- Build & IDE Tools -->
+        <div style="border:2px solid #16a34a;border-radius:8px;background:#f0fdf4;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #bbf7d0;">Build &amp; IDE Tools</div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">App Engine Studio (AES) <span style="color:#16a34a;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Low-code guided app builder<br>Templates &amp; drag-and-drop</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Studio IDE <span style="color:#16a34a;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Full developer IDE (scoped apps)<br>Scripts, server &amp; client code</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">Guided App Creator <span style="color:#16a34a;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Step-by-step wizard for citizen devs</div>
+          </div>
+        </div>
+
+        <!-- Experience & UI -->
+        <div style="border:2px solid #7c3aed;border-radius:8px;background:#faf5ff;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#5b21b6;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e9d5ff;">Experience &amp; UI</div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">UI Builder <span style="color:#7c3aed;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Now Experience components<br>Custom interfaces &amp; pages</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Service Portal Builder <span style="color:#7c3aed;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Employee &amp; customer portals</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Workspace Builder <span style="color:#7c3aed;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Role-based agent workspaces</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">Mobile App Publishing <span style="color:#7c3aed;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">iOS &amp; Android experiences</div>
+          </div>
+        </div>
+
+        <!-- Data -->
+        <div style="border:2px solid #ea580c;border-radius:8px;background:#fff7ed;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#c2410c;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #fed7aa;">Data</div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Table Builder <span style="color:#ea580c;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Custom data models &amp; fields<br>Relationships &amp; references</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Prebuilt Tables <span style="color:#ea580c;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Ready-to-use data structures</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">Custom Table Limits</div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Starter: ~20 custom tables<br>Enterprise: unlimited</div>
+          </div>
+        </div>
+
+        <!-- Automation -->
+        <div style="border:2px solid #dc2626;border-radius:8px;background:#fef2f2;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #fecaca;">Automation</div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Flow Designer <span style="color:#dc2626;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">No/low-code workflow builder<br>Triggers, conditions &amp; actions</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Action Designer <span style="color:#dc2626;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Reusable custom action library</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Process Automation Designer <span style="color:#dc2626;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Kanban cross-dept orchestration</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">ATF (Automated Test Framework) <span style="color:#dc2626;font-size:10px;">★◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Automated app testing</div>
+          </div>
+        </div>
+
+        <!-- Governance -->
+        <div style="border:2px solid #1d4ed8;border-radius:8px;background:#eff6ff;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#1e3a8a;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #bfdbfe;">Governance <span style="font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:3px;margin-left:4px;">◆ Enterprise</span></div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">App Engine Management Center <span style="color:#1d4ed8;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Control tower for all apps<br>Ideas → deployment lifecycle<br>Risk &amp; compliance tracking<br>Multi-team governance</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">App Lifecycle Management <span style="color:#1d4ed8;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Deploy, version &amp; retire apps</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">Risk &amp; Compliance Tracking <span style="color:#1d4ed8;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Policy enforcement across apps</div>
+          </div>
+        </div>
+
+        <!-- Analytics & AI -->
+        <div style="border:2px solid #9333ea;border-radius:8px;background:#faf5ff;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#6b21a8;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e9d5ff;">Analytics &amp; AI <span style="font-size:10px;font-weight:600;background:#f3e8ff;color:#9333ea;padding:1px 5px;border-radius:3px;margin-left:4px;">◆ Enterprise</span></div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Process Mining <span style="color:#9333ea;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Analyze actual process execution<br>Identify bottlenecks visually</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Performance Analytics <span style="color:#9333ea;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">KPIs, dashboards &amp; SLA tracking</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;margin-bottom:6px;">
+            <div style="font-weight:600;">Virtual Agent <span style="color:#9333ea;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">Conversational AI chatbot</div>
+          </div>
+          <div style="font-size:12px;color:#1e293b;">
+            <div style="font-weight:600;">Predictive Intelligence <span style="color:#9333ea;font-size:10px;">◆</span></div>
+            <div style="color:#64748b;padding-left:8px;font-size:11px;">ML-based classification &amp; routing</div>
+          </div>
+        </div>
+
+      </div><!-- end 6-box grid -->
+
+      <!-- Tier Legend (inside App Engine) -->
+      <div style="border:2px dashed #94a3b8;border-radius:8px;background:#f8fafc;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:8px;">Tier Breakdown</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="font-size:12px;color:#475569;line-height:1.6;">
+            <span style="font-weight:700;color:#16a34a;">★ Starter</span> includes: App Engine Studio, Studio IDE, Guided App Creator, UI Builder, Service Portal Builder, Mobile App Publishing, Table Builder, Prebuilt Tables, Flow Designer, Action Designer, Process Automation Designer, ATF
+            <br><span style="color:#94a3b8;">Limits: ~20 custom tables, limited custom app count</span>
+          </div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;">
+            <span style="font-weight:700;color:#1d4ed8;">◆ Enterprise</span> includes everything in Starter, <em>plus:</em> Workspace Builder, App Engine Management Center (AEMC), Process Mining, Performance Analytics, Virtual Agent, Predictive Intelligence
+            <br><span style="color:#94a3b8;">Unlimited custom tables and applications</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end App Engine inner box -->
+
+  </div><!-- end Now Platform outer box -->
+
+  <!-- Now Assist / Build Agent (adjacent, separate SKU) -->
+  <div style="margin-top:16px;border:2px dashed #c2410c;border-radius:10px;background:#fff7ed;padding:14px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:4px;">Now Assist for Creator
+          <span style="font-size:11px;font-weight:500;background:#ffedd5;color:#ea580c;padding:2px 7px;border-radius:4px;margin-left:6px;">Adjacent AI Layer — Separate SKU</span>
+        </div>
+        <div style="font-size:12px;color:#78350f;line-height:1.6;max-width:700px;">Build Agent is adjacent to &amp; tightly integrated with App Engine workflows, but billed/licensed under <strong>Now Assist for Creator</strong> — not as a core App Engine line item.</div>
+      </div>
+      <div style="flex-shrink:0;font-size:11px;color:#c2410c;font-style:italic;text-align:right;white-space:nowrap;">integrates with ↑<br>App Engine Studio</div>
+    </div>
+    <div style="margin-top:12px;border:2px solid #ea580c;border-radius:8px;background:#ffedd5;padding:12px;">
+      <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:8px;">Build Agent</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#78350f;line-height:1.7;">
+        <div>
+          <div>• Autonomous AI for creating &amp; updating ServiceNow applications</div>
+          <div>• Works inside App Engine Studio</div>
+          <div>• Uses natural language to scaffold apps</div>
+        </div>
+        <div>
+          <div>• Licensed via Now Assist for Creator <span style="color:#c2410c;font-weight:600;">(NOT included in App Engine SKUs)</span></div>
+          <div>• Training: "Build Agentic AI Custom Apps with App Engine" (SN Learn)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end ecosystem tab -->
+
+<script>
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
